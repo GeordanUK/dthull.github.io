@@ -1,71 +1,1649 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Double Tap – Coming Soon</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double Tap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #c8a97e;
+    --accent-dim: #9a7d5a;
+    --accent-glow: rgba(200,169,126,0.18);
+    --dark-bg: #0e0e0e;
+    --darker: #080808;
+    --mid-bg: #161616;
+    --card-bg: #131313;
+    --card-hover: #1a1a1a;
+    --text-main: #e2e0db;
+    --text-muted: #6b6860;
+    --text-dim: #4a4844;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(200,169,126,0.25);
+  }
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0f1113; /* obsidian */
-      color: #f2f2f2;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
 
-    .container {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 1rem;
-    }
+  body {
+    background: var(--dark-bg);
+    color: var(--text-main);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
 
-    .logo-wrapper {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(8,8,8,0.94);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 3rem;
+    height: 68px;
+  }
 
-    /* Soft glow */
-    .logo-wrapper::before {
-      content: "";
-      position: absolute;
-      inset: -30px;
-      background: radial-gradient(
-        circle,
-        rgba(64, 180, 160, 0.35) 0%,
-        rgba(64, 180, 160, 0.15) 35%,
-        rgba(64, 180, 160, 0.05) 55%,
-        transparent 70%
-      );
-      filter: blur(20px);
-      z-index: 0;
-    }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--text-main);
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
 
-    img {
-      position: relative;
-      z-index: 1;
-      max-width: 3200px;
-      width: 100%;
-      height: auto;
-    }
+  .nav-logo span { color: var(--accent); }
+  .nav-logo:hover { color: var(--accent); }
 
-    p {
-      font-size: 1.1rem;
-      letter-spacing: 0.04em;
-      opacity: 0.85;
-    }
-  </style>
+  .nav-links {
+    display: flex;
+    gap: 0;
+    list-style: none;
+  }
+
+  .nav-links li a {
+    display: block;
+    padding: 0.55rem 1.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  .nav-links li a::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%; right: 50%;
+    height: 1px;
+    background: var(--accent);
+    transition: left 0.25s, right 0.25s;
+  }
+
+  .nav-links li a:hover,
+  .nav-links li a.active { color: var(--text-main); }
+
+  .nav-links li a:hover::after,
+  .nav-links li a.active::after { left: 1.5rem; right: 1.5rem; }
+
+  /* PAGES */
+  .page {
+    display: none;
+    min-height: 100vh;
+    padding-top: 68px;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HOME ===== */
+  .hero {
+    position: relative;
+    height: calc(100vh - 68px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 60%, rgba(200,169,126,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 15% 85%, rgba(200,169,126,0.04) 0%, transparent 60%),
+      var(--darker);
+    z-index: 0;
+  }
+
+  .hero-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 80px 80px;
+    z-index: 0;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 9rem);
+    line-height: 0.92;
+    color: var(--text-main);
+    letter-spacing: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .hero-title span {
+    display: block;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  .hero-cta {
+    display: inline-block;
+    padding: 0.9rem 2.4rem;
+    background: var(--accent);
+    color: var(--darker);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    border: none;
+  }
+
+  .hero-cta:hover {
+    background: #d9bb8e;
+    transform: translateY(-1px);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    z-index: 1;
+    animation: bobScroll 2s ease-in-out infinite;
+  }
+
+  .hero-scroll::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(var(--accent-dim), transparent);
+  }
+
+  @keyframes bobScroll {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(5px); }
+  }
+
+  /* INFO SECTION */
+  .info-section {
+    padding: 6rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: var(--text-main);
+    letter-spacing: 3px;
+    margin-bottom: 3rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 5rem;
+  }
+
+  .info-block {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    transition: background 0.2s;
+  }
+
+  .info-block:hover { background: var(--card-hover); }
+
+  .info-block-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .info-block-content {
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--text-main);
+    line-height: 1.9;
+  }
+
+  .info-block-content strong {
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* GALLERY */
+  .gallery-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 260px 260px;
+    gap: 3px;
+  }
+
+  .gallery-item {
+    background: var(--card-bg);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+
+  .gallery-item:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .gallery-item:hover { opacity: 0.9; }
+
+  .gallery-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+    filter: brightness(0.85);
+  }
+
+  .gallery-item:hover img { transform: scale(1.04); filter: brightness(0.95); }
+
+  .gallery-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    border: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  .gallery-placeholder-icon { font-size: 1.8rem; opacity: 0.2; }
+
+  .gallery-placeholder-text {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(8,8,8,0.75) 0%, transparent 55%);
+    display: flex;
+    align-items: flex-end;
+    padding: 1.2rem 1.4rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+  .gallery-overlay-text {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .upload-hint {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== DRINKS ===== */
+  .page-hero {
+    padding: 5rem 3rem 3.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    color: var(--text-main);
+    letter-spacing: 5px;
+    line-height: 1;
+    margin-bottom: 0.8rem;
+  }
+
+  .page-hero-sub {
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .page-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem;
+  }
+
+  .menu-section { margin-bottom: 4rem; }
+
+  .menu-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .menu-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 18px; height: 2px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .drink-card {
+    background: var(--card-bg);
+    padding: 1.6rem 1.8rem;
+    transition: background 0.2s;
+  }
+
+  .drink-card:hover { background: var(--card-hover); }
+
+  .drink-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+  }
+
+  .drink-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+
+  .drink-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .drink-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+
+  .drink-tag {
+    font-size: 0.63rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.2rem 0.65rem;
+    border: 1px solid;
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+
+  .drink-tag.special { color: var(--accent); border-color: var(--border-accent); }
+  .drink-tag.beer { color: #a0b090; border-color: rgba(160,176,144,0.3); }
+  .drink-tag.soft { color: #8ab0c0; border-color: rgba(138,176,192,0.3); }
+
+  /* ===== GAMES ===== */
+  .sheet-instructions {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    padding: 1.6rem 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .sheet-instructions h3 {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .sheet-instructions ol {
+    padding-left: 1.2rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 2;
+  }
+
+  .sheet-instructions code {
+    background: rgba(200,169,126,0.1);
+    color: var(--accent);
+    padding: 0.1rem 0.4rem;
+    font-size: 0.82rem;
+    font-family: monospace;
+  }
+
+  .sheet-config {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 1.6rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .sheet-config-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .sheet-config-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .sheet-config input {
+    background: var(--darker);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 0.75rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .sheet-config input:focus { border-color: var(--accent-dim); }
+  .sheet-config input::placeholder { color: var(--text-dim); }
+
+  .btn-load {
+    background: var(--accent);
+    border: none;
+    color: var(--darker);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 0.8rem 1.8rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-load:hover { background: #d9bb8e; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text-main); }
+
+  /* STATUS */
+  .status-bar {
+    padding: 0.9rem 1.4rem;
+    margin-bottom: 2rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .status-bar.loading { background: rgba(200,169,126,0.07); border: 1px solid var(--border-accent); color: var(--accent); }
+  .status-bar.success { background: rgba(100,170,100,0.07); border: 1px solid rgba(100,170,100,0.2); color: #7ab87a; }
+  .status-bar.error { background: rgba(200,80,80,0.07); border: 1px solid rgba(200,80,80,0.2); color: #c87070; }
+  .status-bar.hidden { display: none; }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-bar.success .status-dot { background: #7ab87a; }
+  .status-bar.error .status-dot { background: #c87070; }
+
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(200,169,126,0.25);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* FILTER TABS */
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0.55rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-tab:hover { color: var(--text-main); border-color: rgba(255,255,255,0.15); }
+
+  .filter-tab.active {
+    background: rgba(200,169,126,0.1);
+    border-color: var(--border-accent);
+    color: var(--accent);
+  }
+
+  /* GAMES GRID */
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .game-card {
+    background: var(--card-bg);
+    padding: 1.4rem 1.6rem;
+    border-top: 2px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .game-card:hover {
+    background: var(--card-hover);
+    border-top-color: var(--accent-dim);
+  }
+
+  .game-platform {
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    display: inline-block;
+    border: 1px solid;
+  }
+
+  .game-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
+  }
+
+  .game-genre {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .game-players {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    color: var(--accent-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* Platform colours — muted */
+  .platform-ps3 { color: #6a9fd8; border-color: rgba(106,159,216,0.3); }
+  .platform-ps2 { color: #7a8fd8; border-color: rgba(122,143,216,0.3); }
+  .platform-ps1 { color: #8a9fc8; border-color: rgba(138,159,200,0.3); }
+  .platform-xbox360 { color: #7ab87a; border-color: rgba(122,184,122,0.3); }
+  .platform-xbox { color: #8ac88a; border-color: rgba(138,200,138,0.3); }
+  .platform-wii { color: #d0d0d0; border-color: rgba(208,208,208,0.3); }
+  .platform-gamecube { color: #a070c8; border-color: rgba(160,112,200,0.3); }
+  .platform-n64 { color: #c87070; border-color: rgba(200,112,112,0.3); }
+  .platform-snes { color: #c88070; border-color: rgba(200,128,112,0.3); }
+  .platform-nes { color: #c89070; border-color: rgba(200,144,112,0.3); }
+  .platform-sega { color: #7090c8; border-color: rgba(112,144,200,0.3); }
+  .platform-default { color: var(--text-muted); border-color: var(--border); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+
+  .empty-state-icon { font-size: 2rem; opacity: 0.2; margin-bottom: 1.2rem; }
+
+  .empty-state-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* CONSOLES */
+  .consoles-section { margin-top: 4rem; }
+
+  .consoles-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 4px;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .consoles-title::before {
+    content: '';
+    display: inline-block;
+    width: 18px; height: 2px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .consoles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .console-card {
+    background: var(--card-bg);
+    padding: 1.6rem;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .console-card:hover { background: var(--card-hover); }
+
+  .console-icon { font-size: 1.6rem; margin-bottom: 0.7rem; opacity: 0.7; }
+
+  .console-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-main);
+    margin-bottom: 0.3rem;
+  }
+
+  .console-count { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* FOOTER */
+  footer {
+    background: var(--darker);
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 5rem;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+  }
+
+  .footer-text {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 3rem;
+  }
+
+  /* SEARCH + CONTROLS */
+  .games-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-wrap input:focus { border-color: var(--accent-dim); }
+  .search-wrap input::placeholder { color: var(--text-dim); }
+
+  .search-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    pointer-events: none;
+  }
+
+  .games-count {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; }
+    .nav-links li a { padding: 0.5rem 0.8rem; font-size: 0.7rem; letter-spacing: 1.5px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr 1fr; }
+    .gallery-item:first-child { grid-column: span 2; grid-row: span 1; height: 200px; }
+    .info-section, .page-content { padding: 2.5rem 1.5rem; }
+    .page-hero { padding: 3rem 1.5rem 2.5rem; }
+    .sheet-config { flex-direction: column; }
+    footer { flex-direction: column; gap: 0.8rem; text-align: center; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo-wrapper">
-      <img src="double-tap-logo.png" alt="Double Tap Video Game Taproom Logo" />
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">DOUBLE<span>TAP</span></div>
+  <ul class="nav-links">
+    <li><a href="#" class="active" onclick="showPage('home', this); return false;">Home</a></li>
+    <li><a href="#" onclick="showPage('drinks', this); return false;">Drinks</a></li>
+    <li><a href="#" onclick="showPage('games', this); return false;">Games</a></li>
+  </ul>
+</nav>
+
+
+<!-- ===== HOME ===== -->
+<div id="page-home" class="page active">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Bar &bull; Games &bull; Good Company</p>
+      <h1 class="hero-title">DOUBLE<span>TAP</span></h1>
+      <p class="hero-sub">Drinks &bull; Consoles &bull; Good Times</p>
+      <a class="hero-cta" onclick="showPage('drinks'); return false;">View the Menu</a>
     </div>
-    <p>Something new is coming to Hull soon</p>
+    <div class="hero-scroll">Scroll</div>
+  </section>
+
+  <section class="info-section">
+    <p class="section-eyebrow">Find Us</p>
+    <h2 class="section-title">Visit the Bar</h2>
+
+    <div class="info-grid">
+      <div class="info-block">
+        <p class="info-block-label">Address</p>
+        <div class="info-block-content">
+          <strong>123 Arcade Lane</strong><br>
+          City Centre<br>
+          YourCity, AB1 2CD
+        </div>
+      </div>
+      <div class="info-block">
+        <p class="info-block-label">Opening Hours</p>
+        <div class="info-block-content">
+          Mon–Thu &nbsp;<strong>4pm – Midnight</strong><br>
+          Fri–Sat &nbsp;&nbsp;&nbsp;<strong>2pm – 2am</strong><br>
+          Sunday &nbsp;&nbsp;<strong>2pm – 11pm</strong>
+        </div>
+      </div>
+      <div class="info-block">
+        <p class="info-block-label">Contact</p>
+        <div class="info-block-content">
+          📞 &nbsp;<strong>01234 567890</strong><br>
+          ✉ &nbsp;hello@doubletapbar.com
+        </div>
+      </div>
+      <div class="info-block">
+        <p class="info-block-label">Private Hire</p>
+        <div class="info-block-content">
+          Walk-ins always welcome.<br>
+          Private hire &amp; events available<br>— just get in touch.
+        </div>
+      </div>
+    </div>
+
+    <!-- GALLERY -->
+    <p class="gallery-eyebrow">Photos</p>
+    <div class="gallery">
+      <div class="gallery-item">
+        <!-- Replace with: <img src="your-photo.jpg" alt="The main floor"> -->
+        <div class="gallery-placeholder">
+          <div class="gallery-placeholder-icon">🎮</div>
+          <div class="gallery-placeholder-text">Add Your Photo</div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-text">The Main Floor</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <div class="gallery-placeholder-icon">🍹</div>
+          <div class="gallery-placeholder-text">Add Your Photo</div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-text">The Bar</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <div class="gallery-placeholder-icon">🕹️</div>
+          <div class="gallery-placeholder-text">Add Your Photo</div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-text">Gaming Area</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <div class="gallery-placeholder-icon">🎯</div>
+          <div class="gallery-placeholder-text">Add Your Photo</div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-text">Tournaments</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-placeholder">
+          <div class="gallery-placeholder-icon">🌟</div>
+          <div class="gallery-placeholder-text">Add Your Photo</div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-text">Events</span></div>
+      </div>
+    </div>
+    <p class="upload-hint">To add photos, replace the placeholder divs with &lt;img src="your-image.jpg"&gt; tags.</p>
+  </section>
+
+  <footer>
+    <div class="footer-logo">DOUBLE TAP</div>
+    <div class="footer-text">© 2025 — All rights reserved</div>
+  </footer>
+</div>
+
+
+<!-- ===== DRINKS ===== -->
+<div id="page-drinks" class="page">
+  <div class="page-hero">
+    <p class="section-eyebrow">What We Pour</p>
+    <h1 class="page-hero-title">The Menu</h1>
+    <p class="page-hero-sub">Something for every player</p>
   </div>
+
+  <div class="page-content">
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Signature Cocktails</h2>
+      <div class="drinks-grid">
+        <div class="drink-card">
+          <div class="drink-name">Double Tap</div>
+          <div class="drink-desc">Our namesake — dark rum, espresso, coffee liqueur, black sugar, cream float</div>
+          <div class="drink-footer"><div class="drink-price">£9.50</div><div class="drink-tag special">Signature</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Health Potion</div>
+          <div class="drink-desc">Grenadine, cranberry, raspberry liqueur, sparkling water — revives you instantly</div>
+          <div class="drink-footer"><div class="drink-price">£8.50</div><div class="drink-tag special">Signature</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Blue Screen</div>
+          <div class="drink-desc">Blue curaçao, vodka, lemon juice, blue raspberry, topped with lemonade</div>
+          <div class="drink-footer"><div class="drink-price">£9.00</div><div class="drink-tag special">Signature</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Side Quest</div>
+          <div class="drink-desc">Passionfruit rum, mango, pineapple, lime — a detour worth taking</div>
+          <div class="drink-footer"><div class="drink-price">£9.50</div><div class="drink-tag special">Signature</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">The Warp Zone</div>
+          <div class="drink-desc">Gin, cucumber, elderflower, tonic, fresh mint</div>
+          <div class="drink-footer"><div class="drink-price">£8.00</div><div class="drink-tag special">Signature</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Speed Run</div>
+          <div class="drink-desc">Tequila, blue spirulina, ginger beer, lime — fast and dangerous</div>
+          <div class="drink-footer"><div class="drink-price">£8.50</div><div class="drink-tag special">Signature</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Classic Cocktails</h2>
+      <div class="drinks-grid">
+        <div class="drink-card">
+          <div class="drink-name">Negroni</div>
+          <div class="drink-desc">Gin, Campari, sweet vermouth — stirred not shaken</div>
+          <div class="drink-footer"><div class="drink-price">£8.50</div><div class="drink-tag">Classic</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Espresso Martini</div>
+          <div class="drink-desc">Vodka, espresso, coffee liqueur, sugar syrup</div>
+          <div class="drink-footer"><div class="drink-price">£9.00</div><div class="drink-tag">Classic</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Old Fashioned</div>
+          <div class="drink-desc">Bourbon, bitters, sugar, orange peel</div>
+          <div class="drink-footer"><div class="drink-price">£9.00</div><div class="drink-tag">Classic</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Aperol Spritz</div>
+          <div class="drink-desc">Aperol, Prosecco, soda water, orange slice</div>
+          <div class="drink-footer"><div class="drink-price">£8.00</div><div class="drink-tag">Classic</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Beers &amp; Ciders</h2>
+      <div class="drinks-grid">
+        <div class="drink-card">
+          <div class="drink-name">Peroni Nastro Azzurro</div>
+          <div class="drink-desc">Italian lager, crisp and refreshing — 330ml bottle</div>
+          <div class="drink-footer"><div class="drink-price">£4.50</div><div class="drink-tag beer">Lager</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Guinness</div>
+          <div class="drink-desc">The classic Irish stout — pint on draught</div>
+          <div class="drink-footer"><div class="drink-price">£5.50</div><div class="drink-tag beer">Stout</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Punk IPA</div>
+          <div class="drink-desc">BrewDog's flagship pale ale — 330ml can</div>
+          <div class="drink-footer"><div class="drink-price">£5.00</div><div class="drink-tag beer">IPA</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Rekorderlig Strawberry</div>
+          <div class="drink-desc">Swedish premium fruit cider — 500ml bottle</div>
+          <div class="drink-footer"><div class="drink-price">£5.50</div><div class="drink-tag beer">Cider</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Soft Drinks &amp; No-Alcohol</h2>
+      <div class="drinks-grid">
+        <div class="drink-card">
+          <div class="drink-name">House Lemonade</div>
+          <div class="drink-desc">Freshly made daily with mint and cucumber</div>
+          <div class="drink-footer"><div class="drink-price">£3.50</div><div class="drink-tag soft">0% ABV</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Energy Drinks</div>
+          <div class="drink-desc">Monster, Red Bull, or Lucozade — ask your bartender</div>
+          <div class="drink-footer"><div class="drink-price">£3.00</div><div class="drink-tag soft">0% ABV</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Seedlip Spritz</div>
+          <div class="drink-desc">Seedlip Spice, tonic, cucumber, pink peppercorn</div>
+          <div class="drink-footer"><div class="drink-price">£6.50</div><div class="drink-tag soft">0% ABV</div></div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-name">Freestyle Mocktail</div>
+          <div class="drink-desc">Tell us what you fancy and we'll make it happen</div>
+          <div class="drink-footer"><div class="drink-price">£5.00</div><div class="drink-tag soft">0% ABV</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-logo">DOUBLE TAP</div>
+    <div class="footer-text">Please drink responsibly</div>
+  </footer>
+</div>
+
+
+<!-- ===== GAMES ===== -->
+<div id="page-games" class="page">
+  <div class="page-hero">
+    <p class="section-eyebrow">What We Play</p>
+    <h1 class="page-hero-title">Games Library</h1>
+    <p class="page-hero-sub">353 games across 18 platforms</p>
+  </div>
+
+  <div class="page-content">
+
+    <div class="games-controls">
+      <div class="search-wrap">
+        <input type="text" id="gameSearch" placeholder="Search games…" oninput="applyFilters()" autocomplete="off">
+        <span class="search-icon">⌕</span>
+      </div>
+      <div class="games-count" id="gamesCount">353 games</div>
+    </div>
+
+    <div class="filter-tabs" id="filterTabs"></div>
+
+    <div class="games-grid" id="gamesGrid"></div>
+
+    <div class="consoles-section" id="consolesSection">
+      <h2 class="consoles-title">Consoles Available</h2>
+      <div class="consoles-grid" id="consolesGrid"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-logo">DOUBLE TAP</div>
+    <div class="footer-text">All games subject to availability</div>
+  </footer>
+</div>
+
+
+<script>
+  // ---- Game Data (353 games, baked in from CSV) ----
+  const GAMES = [
+  {t:'2006 FIFA World Cup',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'Actua Soccer 3',p:'PSX',g:'Sports',pl:'1-2'},
+  {t:'Alex Kidd in the Enchanted Castle',p:'Mega Drive Mini',g:'Adventure',pl:'1'},
+  {t:'Alfred Chicken',p:'SNES',g:'Platformer',pl:'1'},
+  {t:'Alisia Dragoon',p:'Mega Drive Mini',g:'Platformer',pl:'1'},
+  {t:'Altered Beast',p:'Mega Drive Mini',g:'Adventure',pl:'1'},
+  {t:'Assassin\'s Creed Brotherhood',p:'Xbox 360',g:'Action',pl:'1'},
+  {t:'Atari Anthology',p:'PS2',g:'Compilation',pl:'1-2'},
+  {t:'Balloon Fight',p:'NES Mini',g:'Action',pl:'1-2'},
+  {t:'Band Hero',p:'Xbox 360',g:'Rhythm',pl:'1-2'},
+  {t:'Battle Area Toshinden',p:'PSX',g:'Fighting',pl:'1-2'},
+  {t:'Battle Area Toshinden',p:'PSX Mini',g:'Fighting',pl:'1-2'},
+  {t:'Battlefield 3',p:'Xbox 360',g:'FPS',pl:'1'},
+  {t:'Beyond Oasis',p:'Mega Drive Mini',g:'Adventure',pl:'1'},
+  {t:'Big Bass Fishing',p:'PSX',g:'Sports',pl:'1'},
+  {t:'Bioshock',p:'Xbox 360',g:'FPS',pl:'1'},
+  {t:'Brian Lara Cricket',p:'PSX',g:'Sports',pl:'1-2'},
+  {t:'Bubble Bobble',p:'NES Mini',g:'Puzzle',pl:'1-2'},
+  {t:'Burnout 3: Takedown',p:'Xbox',g:'Racing',pl:'1-2'},
+  {t:'Burnout 3: Takedown',p:'PS2',g:'Racing',pl:'1-2'},
+  {t:'Burnout Paradise',p:'Xbox 360',g:'Racing',pl:'1-2'},
+  {t:'Call of Duty 3',p:'Xbox 360',g:'FPS',pl:'1-2'},
+  {t:'Call of Duty 4 Modern Warfare',p:'Xbox 360',g:'FPS',pl:'1-2'},
+  {t:'Call of Duty Black Ops',p:'Xbox 360',g:'FPS',pl:'1-2'},
+  {t:'Call of Duty Modern Warfare 3',p:'Xbox 360',g:'FPS',pl:'1-2'},
+  {t:'Carmageddon',p:'PSX',g:'Racing',pl:'1-2'},
+  {t:'Castle of Illusion Starring Mickey Mouse',p:'Mega Drive Mini',g:'Adventure',pl:'1'},
+  {t:'Castlevania',p:'NES Mini',g:'Platformer',pl:'1'},
+  {t:'Castlevania 2: Simon\'s Quest',p:'NES Mini',g:'Platformer',pl:'1'},
+  {t:'Castlevania: Bloodlines',p:'Mega Drive Mini',g:'Platformer',pl:'1'},
+  {t:'Chess Challenger',p:'PS2',g:'Puzzle',pl:'1-2'},
+  {t:'Colin McRae Rally',p:'PSX',g:'Racing',pl:'1-2'},
+  {t:'Columns',p:'Mega Drive',g:'Puzzle',pl:'1-2'},
+  {t:'Columns',p:'Mega Drive Mini',g:'Puzzle',pl:'1-2'},
+  {t:'Comix Zone',p:'Mega Drive Mini',g:'Beat \'Em Up',pl:'1'},
+  {t:'Contra III: The Alien Wars',p:'SNES Mini',g:'Shoot \'Em Up',pl:'1-2'},
+  {t:'Contra: Hard Corps',p:'Mega Drive Mini',g:'Shoot \'Em Up',pl:'1-2'},
+  {t:'Cool Boarders 2',p:'PSX Mini',g:'Sports',pl:'1-2'},
+  {t:'Corporation',p:'Mega Drive',g:'FPS',pl:'1'},
+  {t:'Crackdown',p:'Xbox 360',g:'Open World',pl:'1'},
+  {t:'Crash Bandicoot 2: Cortex Strikes Back',p:'PSX',g:'Platformer',pl:'1'},
+  {t:'Crash Bandicoot 3 Warped',p:'PSX',g:'Platformer',pl:''},
+  {t:'Crash Nitro Kart',p:'PS2',g:'Racing',pl:''},
+  {t:'Crazy Taxi',p:'PS2',g:'Racing',pl:''},
+  {t:'Croc - Legend of the Gobbos',p:'PSX',g:'Platformer',pl:''},
+  {t:'Darius',p:'Mega Drive Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Dead or Alive 3',p:'Xbox',g:'Fighting',pl:''},
+  {t:'Dead or Alive 4',p:'Xbox 360',g:'Fighting',pl:''},
+  {t:'Destruction Derby',p:'PSX Mini',g:'Racing',pl:''},
+  {t:'Dino Crisis',p:'PSX',g:'Horror',pl:''},
+  {t:'DJ Hero',p:'Xbox 360',g:'Rhythm',pl:''},
+  {t:'Donkey Kong',p:'NES Mini',g:'Puzzle',pl:''},
+  {t:'Donkey Kong Country',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Donkey Kong Jr',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Donkey Konga',p:'Gamecube',g:'Rhythm',pl:''},
+  {t:'Doom',p:'PSX',g:'FPS',pl:''},
+  {t:'Double Dragon 2: The Revenge',p:'NES Mini',g:'Beat \'Em Up',pl:''},
+  {t:'Dr Mario',p:'NES Mini',g:'Puzzle',pl:''},
+  {t:'Dr. Robotnik\'s Mean Bean Machine',p:'Mega Drive Mini',g:'Puzzle',pl:''},
+  {t:'Driver',p:'PSX',g:'Racing',pl:''},
+  {t:'Dynamite Headdy',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Dynasty Warriors 2',p:'PS2',g:'Fighting',pl:''},
+  {t:'EarthBound',p:'SNES Mini',g:'JRPG',pl:''},
+  {t:'Earthworm Jim',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Ecco the Dolphin',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Eternal Champions',p:'Mega Drive Mini',g:'Fighting',pl:''},
+  {t:'Eternal Sonata',p:'Xbox 360',g:'JRPG',pl:''},
+  {t:'Everybody\'s Golf',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'Excitebike',p:'NES Mini',g:'Racing',pl:'1-2'},
+  {t:'F-Zero',p:'SNES Mini',g:'Racing',pl:'1-2'},
+  {t:'F1 2010',p:'Xbox 360',g:'Racing',pl:'1-2'},
+  {t:'FIFA 01',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 03',p:'Gamecube',g:'Sports',pl:'1-2'},
+  {t:'FIFA 03',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 04',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 05',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 06',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 07',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 08',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 09',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA 09',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'FIFA 12',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'FIFA 14',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'FIFA 15',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'FIFA 99',p:'PSX',g:'Sports',pl:'1-2'},
+  {t:'FIFA Street',p:'Gamecube',g:'Sports',pl:'1-2'},
+  {t:'FIFA Street',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'FIFA Street 2',p:'Xbox',g:'Sports',pl:'1-2'},
+  {t:'FIFA Street 3',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'Fight Night 2004',p:'PS2',g:'Sports',pl:'1-2'},
+  {t:'Fight Night Round 3',p:'Xbox 360',g:'Sports',pl:'1-2'},
+  {t:'Final Fantasy',p:'NES Mini',g:'JRPG',pl:''},
+  {t:'Final Fantasy VI',p:'SNES Mini',g:'JRPG',pl:''},
+  {t:'Final Fantasy VII',p:'PSX',g:'JRPG',pl:''},
+  {t:'Final Fantasy VII',p:'PSX Mini',g:'JRPG',pl:''},
+  {t:'Final Fantasy VIII',p:'PSX',g:'JRPG',pl:''},
+  {t:'Final Fantasy X',p:'PS2',g:'JRPG',pl:''},
+  {t:'Final Fantasy XII',p:'PS2',g:'JRPG',pl:''},
+  {t:'Final Fantasy XIII',p:'PS3',g:'JRPG',pl:''},
+  {t:'Forza Horizon',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Forza Motorsport 2',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Forza Motorsport 3',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Forza Motorsport 4',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Galaga',p:'NES Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Gears of War',p:'Xbox 360',g:'Action',pl:''},
+  {t:'Ghosts \'n Goblins',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Ghouls \'n Ghosts',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Golden Axe',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Gradius',p:'NES Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Gran Turismo 2',p:'PSX',g:'Racing',pl:''},
+  {t:'Gran Turismo 3 A-Spec',p:'PS2',g:'Racing',pl:''},
+  {t:'Gran Turismo 4',p:'PS2',g:'Racing',pl:''},
+  {t:'Grand Theft Auto',p:'PSX',g:'Open World',pl:''},
+  {t:'Grand Theft Auto',p:'PSX Mini',g:'Open World',pl:''},
+  {t:'Grand Theft Auto - San Andreas',p:'PS2',g:'Open World',pl:''},
+  {t:'Grand Theft Auto - Vice City',p:'PS2',g:'Open World',pl:''},
+  {t:'Grand Theft Auto IV',p:'Xbox 360',g:'Open World',pl:''},
+  {t:'Grand Theft Auto London',p:'PSX',g:'Open World',pl:''},
+  {t:'Grand Theft Auto V',p:'Xbox 360',g:'Open World',pl:''},
+  {t:'Guitar Hero - World Tour',p:'PS3',g:'Rhythm',pl:''},
+  {t:'Gunstar Heroes',p:'Mega Drive Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Halo',p:'Xbox',g:'FPS',pl:''},
+  {t:'Halo 2',p:'Xbox',g:'FPS',pl:''},
+  {t:'Halo 3',p:'Xbox 360',g:'FPS',pl:''},
+  {t:'Halo: Reach',p:'Xbox 360',g:'FPS',pl:''},
+  {t:'Harry Potter and the Chamber of Secrets',p:'Gamecube',g:'Adventure',pl:''},
+  {t:'Harry Potter and the Philosopher\'s Stone',p:'PSX',g:'Adventure',pl:''},
+  {t:'Harry Potter Quidditch World Cup',p:'Gamecube',g:'Sports',pl:''},
+  {t:'Hitman Contracts',p:'PS2',g:'Action',pl:''},
+  {t:'Ice Climber',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Intelligent Qube',p:'PSX Mini',g:'Puzzle',pl:''},
+  {t:'International Track & Field',p:'PSX',g:'Sports',pl:''},
+  {t:'Jak & Dexter: The Precursor Legacy',p:'PSX',g:'Adventure',pl:''},
+  {t:'James Bond 007: Nightfire',p:'PS2',g:'FPS',pl:''},
+  {t:'James Bond 007: Nightfire',p:'Gamecube',g:'FPS',pl:''},
+  {t:'Jumping Flash!',p:'PSX Mini',g:'Platformer',pl:''},
+  {t:'Kid Chameleon',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Kid Icarus',p:'NES Mini',g:'Action',pl:''},
+  {t:'Kirby Super Star',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Kirby\'s Adventure',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Kirby\'s Dream Course',p:'SNES Mini',g:'Sports',pl:''},
+  {t:'Knockout Kings 2001',p:'PSX',g:'Sports',pl:''},
+  {t:'Landstalker: The Treasures of King Nole',p:'Mega Drive Mini',g:'RPG',pl:''},
+  {t:'Lego Harry Potter Years 1 to 4',p:'Xbox 360',g:'Platformer',pl:''},
+  {t:'Lego Jurassic World',p:'Xbox 360',g:'Platformer',pl:''},
+  {t:'Lemmings',p:'SNES',g:'Puzzle',pl:''},
+  {t:'Light Crusader',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Lion King',p:'SNES',g:'Platformer',pl:''},
+  {t:'Lord Of The Rings: The Return Of The King',p:'PS2',g:'Adventure',pl:''},
+  {t:'Lord Of The Rings: The Two Towers',p:'PS2',g:'Adventure',pl:''},
+  {t:'Madden 11',p:'Xbox 360',g:'Sports',pl:''},
+  {t:'Madden NFL 09',p:'Xbox 360',g:'Sports',pl:''},
+  {t:'Mario Bros',p:'NES Mini',g:'Puzzle',pl:''},
+  {t:'Mario Golf Toadstool Tour',p:'Gamecube',g:'Sports',pl:''},
+  {t:'Mario Kart Double Dash',p:'Gamecube',g:'Racing',pl:''},
+  {t:'Mario Kart Wii',p:'Wii',g:'Racing',pl:''},
+  {t:'Medal of Honor: European Assault',p:'PS2',g:'FPS',pl:''},
+  {t:'Medal of Honor: Frontline',p:'PS2',g:'FPS',pl:''},
+  {t:'Medal Of Honor: Rising Sun',p:'Gamecube',g:'FPS',pl:''},
+  {t:'Medal Of Honor: Rising Sun',p:'PS2',g:'FPS',pl:''},
+  {t:'Medal of Honor: Warfighter',p:'Xbox 360',g:'FPS',pl:''},
+  {t:'Medievil',p:'PSX',g:'Adventure',pl:''},
+  {t:'Mega Man 2',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Mega Man X',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Mega Man: The Wily Wars',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Merceneries',p:'PS2',g:'Action',pl:''},
+  {t:'Metal Gear Solid',p:'PSX',g:'Action',pl:''},
+  {t:'Metal Gear Solid',p:'PSX Mini',g:'Action',pl:''},
+  {t:'Metal Gear Solid - Special Missions',p:'PSX',g:'Action',pl:''},
+  {t:'Metal Gear Solid 2 Substance',p:'PS2',g:'Action',pl:''},
+  {t:'Metal Gear Solid 3 Subsistance',p:'PS2',g:'Action',pl:''},
+  {t:'Metal Gear Solid 4 - Guns of the Patriots',p:'PS3',g:'Action',pl:''},
+  {t:'Metal Gear Solid The Twin Snakes',p:'Gamecube',g:'Action',pl:''},
+  {t:'Metroid',p:'NES Mini',g:'Action',pl:''},
+  {t:'Micro Machines',p:'PS2',g:'Racing',pl:''},
+  {t:'Micro Machines 2',p:'Mega Drive',g:'Racing',pl:''},
+  {t:'Midway Arcade Treasures 2',p:'PS2',g:'Compilation',pl:''},
+  {t:'Monster World IV',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Mortal Kombat Deadly Alliance',p:'PS2',g:'Fighting',pl:''},
+  {t:'Mr. Driller',p:'PSX Mini',g:'Puzzle',pl:''},
+  {t:'NBA 96',p:'SNES',g:'Sports',pl:''},
+  {t:'Need for Speed Carbon',p:'PS2',g:'Racing',pl:''},
+  {t:'Need for Speed Pro Street',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Need for Speed Pro Street',p:'PS2',g:'Racing',pl:''},
+  {t:'Need for Speed Rivals',p:'Xbox 360',g:'Racing',pl:''},
+  {t:'Need For Speed Underground',p:'PS2',g:'Racing',pl:''},
+  {t:'Need For Speed Underground 2',p:'PS2',g:'Racing',pl:''},
+  {t:'Need For Speed Underground 2',p:'Xbox',g:'Racing',pl:''},
+  {t:'NFL Street',p:'PS2',g:'Sports',pl:''},
+  {t:'NFL Street 2',p:'PS2',g:'Sports',pl:''},
+  {t:'NHL 2003',p:'PS2',g:'Sports',pl:''},
+  {t:'Ninja Gaiden',p:'NES Mini',g:'Action',pl:''},
+  {t:'Oddworld: Abe\'s Oddysee',p:'PSX Mini',g:'Puzzle',pl:''},
+  {t:'Pac-Man',p:'NES Mini',g:'Puzzle',pl:''},
+  {t:'Perfect Dark Zero',p:'Xbox 360',g:'FPS',pl:''},
+  {t:'Phantasy Star IV: The End of the Millennium',p:'Mega Drive Mini',g:'JRPG',pl:''},
+  {t:'Pinball',p:'PS2',g:'Puzzle',pl:''},
+  {t:'Prince of Persia',p:'Mega Drive',g:'Platformer',pl:''},
+  {t:'Prince of Persia - The Two Thrones',p:'PS2',g:'Platformer',pl:''},
+  {t:'Pro Evolution Soccer',p:'PS2',g:'Sports',pl:''},
+  {t:'Pro Evolution Soccer 2008',p:'Xbox 360',g:'Sports',pl:''},
+  {t:'Pro Evolution Soccer 4',p:'PS2',g:'Sports',pl:''},
+  {t:'Pro Evolution Soccer 5',p:'PS2',g:'Sports',pl:''},
+  {t:'Pro Evolution Soccer 6',p:'PS2',g:'Sports',pl:''},
+  {t:'Punch-Out!! Featuring Mr Dream',p:'NES Mini',g:'Sports',pl:''},
+  {t:'R4: Ridge Racer Type 4',p:'PSX Mini',g:'Racing',pl:''},
+  {t:'Rayman',p:'PSX Mini',g:'Platformer',pl:''},
+  {t:'Rayman',p:'PSX',g:'Platformer',pl:''},
+  {t:'Resident Evil 3 Nemesis',p:'PSX',g:'Horror',pl:''},
+  {t:'Resident Evil: Director\'s Cut',p:'PSX Mini',g:'Horror',pl:''},
+  {t:'Revelations: Persona',p:'PSX Mini',g:'JRPG',pl:''},
+  {t:'Revenge of Shinobi',p:'Mega Drive',g:'Action',pl:''},
+  {t:'Ridge Racer Revolution',p:'PSX',g:'Racing',pl:''},
+  {t:'Rings of Power',p:'Mega Drive',g:'RPG',pl:''},
+  {t:'Road Rash II',p:'Mega Drive Mini',g:'Racing',pl:''},
+  {t:'Rock Band',p:'Xbox 360',g:'Rhythm',pl:''},
+  {t:'Rock Band 2',p:'Xbox 360',g:'Rhythm',pl:''},
+  {t:'Rugby League',p:'PS2',g:'Sports',pl:''},
+  {t:'Rugly League Live 2',p:'Xbox 360',g:'Sports',pl:''},
+  {t:'Rugrats Search for Reptar',p:'PSX',g:'Adventure',pl:''},
+  {t:'Saints Row The Third',p:'Xbox 360',g:'Open World',pl:''},
+  {t:'Secret of Mana',p:'SNES Mini',g:'JRPG',pl:''},
+  {t:'Sega Mega Drive Collection',p:'PS2',g:'Compilation',pl:''},
+  {t:'Sega Mega Drive Ultimate Collection',p:'Xbox 360',g:'Compilation',pl:''},
+  {t:'Sega Soccer',p:'Mega Drive',g:'Sports',pl:''},
+  {t:'Shadow of Rome',p:'PS2',g:'Action',pl:''},
+  {t:'Shining Force',p:'Mega Drive Mini',g:'JRPG',pl:''},
+  {t:'Shinobi III: Return of the Ninja Master',p:'Mega Drive Mini',g:'Action',pl:''},
+  {t:'Sonic Adventure 2 Battle',p:'Gamecube',g:'Platformer',pl:''},
+  {t:'Sonic Generations',p:'Xbox 360',g:'Platformer',pl:''},
+  {t:'Sonic Heroes',p:'PS2',g:'Platformer',pl:''},
+  {t:'Sonic Mega Collection Plus',p:'Xbox',g:'Compilation',pl:''},
+  {t:'Sonic Mega Collection Plus',p:'PS2',g:'Compilation',pl:''},
+  {t:'Sonic Spinball',p:'Mega Drive Mini',g:'Pinball',pl:''},
+  {t:'Sonic The Hedgehog',p:'Mega Drive',g:'Platformer',pl:''},
+  {t:'Sonic the Hedgehog',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Sonic The Hedgehog 2',p:'Mega Drive',g:'Platformer',pl:''},
+  {t:'Sonic the Hedgehog 2',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Sonic the Hedgehog 3',p:'Mega Drive',g:'Platformer',pl:''},
+  {t:'Soul Calibur 2',p:'Xbox',g:'Fighting',pl:''},
+  {t:'Soul Calibur 2',p:'Gamecube',g:'Fighting',pl:''},
+  {t:'Space Harrier II',p:'Mega Drive Mini',g:'Rail Shooter',pl:''},
+  {t:'Spiderman',p:'PS2',g:'Adventure',pl:''},
+  {t:'Star Fox 2',p:'SNES Mini',g:'Rail Shooter',pl:''},
+  {t:'Star Wars - Rebel Strike Rogue Squadron 3',p:'Gamecube',g:'Flight Sim',pl:''},
+  {t:'Star Wars - Rogue Leader Rogue Squadron 2',p:'Gamecube',g:'Flight Sim',pl:''},
+  {t:'Star Wars Jedi Knight 2 - Jedi Outcast',p:'Gamecube',g:'Adventure',pl:''},
+  {t:'Star Wars: Battlefront',p:'PS2',g:'FPS',pl:''},
+  {t:'StarTropics',p:'NES Mini',g:'Action',pl:''},
+  {t:'Starwing',p:'SNES Mini',g:'Rail Shooter',pl:''},
+  {t:'Street Fighter II',p:'SNES',g:'Fighting',pl:''},
+  {t:'Street Fighter II Turbo',p:'SNES',g:'Fighting',pl:''},
+  {t:'Street Fighter II Turbo: Hyper Fighting',p:'SNES Mini',g:'Fighting',pl:''},
+  {t:'Street Fighter II: Special Champion Edition',p:'Mega Drive Mini',g:'Fighting',pl:''},
+  {t:'Streets of Rage',p:'Mega Drive',g:'Beat \'Em Up',pl:''},
+  {t:'Streets of Rage 2',p:'Mega Drive Mini',g:'Beat \'Em Up',pl:''},
+  {t:'Strider',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'Super Bust-a-Move',p:'PS2',g:'Puzzle',pl:''},
+  {t:'Super Castlevania IV',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Super Contra',p:'NES Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Super Fantasy Zone',p:'Mega Drive Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Super Ghouls \'n Ghosts',p:'SNES Mini',g:'Action',pl:''},
+  {t:'Super Mario 64',p:'N64',g:'Platformer',pl:''},
+  {t:'Super Mario Allstars',p:'SNES',g:'Platformer',pl:''},
+  {t:'Super Mario Bros',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Super Mario Bros 2',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Super Mario Bros 3',p:'NES Mini',g:'Platformer',pl:''},
+  {t:'Super Mario Kart',p:'SNES Mini',g:'Racing',pl:''},
+  {t:'Super Mario RPG: Legend of the Seven Stars',p:'SNES Mini',g:'JRPG',pl:''},
+  {t:'Super Mario Sunshine',p:'Gamecube',g:'Platformer',pl:''},
+  {t:'Super Mario World',p:'SNES',g:'Platformer',pl:''},
+  {t:'Super Mario World',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Super Mario World 2 - Yoshi\'s Island',p:'SNES',g:'Platformer',pl:''},
+  {t:'Super Mario World 2 - Yoshi\'s Island',p:'SNES Mini',g:'Platformer',pl:''},
+  {t:'Super Metroid',p:'SNES Mini',g:'Adventure',pl:''},
+  {t:'Super Monaco GP',p:'Mega Drive',g:'Racing',pl:''},
+  {t:'Super Punch-Out!!',p:'SNES Mini',g:'Sports',pl:''},
+  {t:'Super Puzzle Fighter II Turbo',p:'PSX Mini',g:'Puzzle',pl:''},
+  {t:'Super Smash Bros Brawl',p:'Wii',g:'Fighting',pl:''},
+  {t:'Super Smash Bros Melee',p:'Gamecube',g:'Fighting',pl:''},
+  {t:'Super Tennis',p:'SNES',g:'Sports',pl:''},
+  {t:'Super Thunder Blade',p:'Mega Drive',g:'Action',pl:''},
+  {t:'Syphon Filter',p:'PSX Mini',g:'Action',pl:''},
+  {t:'Taito Legends',p:'PS2',g:'Compilation',pl:''},
+  {t:'Tecmo Bowl',p:'NES Mini',g:'Sports',pl:''},
+  {t:'Tekken 3',p:'PSX Mini',g:'Fighting',pl:''},
+  {t:'Tekken 4',p:'PS2',g:'Fighting',pl:''},
+  {t:'Tekken Tag Tournament',p:'PS2',g:'Fighting',pl:''},
+  {t:'Tetris',p:'Mega Drive Mini',g:'Puzzle',pl:''},
+  {t:'Tetris Attack',p:'SNES',g:'Puzzle',pl:''},
+  {t:'Tetris World',p:'PS2',g:'Puzzle',pl:''},
+  {t:'The Legend of Zelda',p:'NES Mini',g:'Adventure',pl:''},
+  {t:'The Legend of Zelda - Ocarina of Time',p:'N64',g:'Adventure',pl:''},
+  {t:'The Legend of Zelda - Wind Waker',p:'Gamecube',g:'Adventure',pl:''},
+  {t:'The Legend of Zelda: A Link to the Past',p:'SNES Mini',g:'Adventure',pl:''},
+  {t:'The Simpsons Hit and Run',p:'PS2',g:'Open World',pl:''},
+  {t:'The Simpsons Skateboarding',p:'PS2',g:'Sports',pl:''},
+  {t:'The Sims',p:'PS2',g:'Life Sim',pl:''},
+  {t:'The Urbz',p:'PS2',g:'Life Sim',pl:''},
+  {t:'Theme Park',p:'PSX',g:'Tycoon',pl:''},
+  {t:'Theme Park World',p:'PSX',g:'Tycoon',pl:''},
+  {t:'Thunder Force III',p:'Mega Drive Mini',g:'Shoot \'Em Up',pl:''},
+  {t:'Tiger Woods PGA Tour 2004',p:'PS2',g:'Sports',pl:''},
+  {t:'Tiger Woods PGA Tour 2004',p:'Xbox',g:'Sports',pl:''},
+  {t:'Tiger Woods PGA Tour 2005',p:'PS2',g:'Sports',pl:''},
+  {t:'Tiger Woods PGA Tour 2006',p:'PS2',g:'Sports',pl:''},
+  {t:'Timesplitters Future Perfect',p:'PS2',g:'FPS',pl:''},
+  {t:'ToeJam & Earl',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Tom Clancy\'s Ghost Recon',p:'PS2',g:'Action',pl:''},
+  {t:'Tom Clancy\'s Rainbow Six',p:'PSX Mini',g:'FPS',pl:''},
+  {t:'Tom Clancy\'s Splinter Cell',p:'Xbox',g:'FPS',pl:''},
+  {t:'Tom Clancy\'s Splinter Cell - Pandora Tomorrow',p:'PS2',g:'Action',pl:''},
+  {t:'Tomb Raider',p:'PSX',g:'Adventure',pl:''},
+  {t:'Tomb Raider 2',p:'PSX',g:'Adventure',pl:''},
+  {t:'Tony Hawk\'s American Wasteland',p:'PS2',g:'Skateboarding',pl:''},
+  {t:'Tony Hawk\'s Pro Skater 3',p:'PS2',g:'Skateboarding',pl:''},
+  {t:'Tony Hawk\'s Skateboarding',p:'PSX',g:'Skateboarding',pl:''},
+  {t:'Tony Hawk\'s Underground 2',p:'Gamecube',g:'Skateboarding',pl:''},
+  {t:'Tony Hawk\'s Underground 2',p:'PS2',g:'Skateboarding',pl:''},
+  {t:'Tony Hawks Pro Skater 4',p:'PS2',g:'Skateboarding',pl:''},
+  {t:'Traysia',p:'Mega Drive',g:'RPG',pl:''},
+  {t:'Twisted Metal',p:'PSX Mini',g:'Racing',pl:''},
+  {t:'UEFA Euro 2004 Portugal',p:'PS2',g:'Sports',pl:''},
+  {t:'V-Rally 97 Championship Edition',p:'PSX',g:'Racing',pl:''},
+  {t:'Vectorman',p:'Mega Drive Mini',g:'Adventure',pl:''},
+  {t:'Virtua Fighter 2',p:'Mega Drive Mini',g:'Fighting',pl:''},
+  {t:'Virtua Tennis 4',p:'Xbox 360',g:'Sports',pl:''},
+  {t:'Viva Pinata',p:'Xbox 360',g:'Life Sim',pl:''},
+  {t:'Where In Time Is Carmen Sandiego',p:'Mega Drive',g:'Puzzle',pl:''},
+  {t:'Who Wants To Be A Millionaire Junior Edition',p:'PSX',g:'Quiz',pl:''},
+  {t:'Who Wants To Be A Millionaire Party Edition',p:'PS2',g:'Quiz',pl:''},
+  {t:'Wii Sports',p:'Wii',g:'Family',pl:''},
+  {t:'Wild Arms',p:'PSX Mini',g:'JRPG',pl:''},
+  {t:'Wonder Boy in Monster World',p:'Mega Drive Mini',g:'Action',pl:''},
+  {t:'World of Illusion',p:'Mega Drive Mini',g:'Platformer',pl:''},
+  {t:'World Snooker Championship',p:'PSX',g:'Sports',pl:''},
+  {t:'Worms Armageddon',p:'PSX',g:'Strategy',pl:''},
+  {t:'WWE Day of Reckoning',p:'Gamecube',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown Shut Your Mouth',p:'PS2',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw',p:'PS2',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw 2006',p:'PS2',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw 2007',p:'Xbox 360',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw 2009',p:'Xbox 360',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw 2010',p:'Xbox 360',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown vs Raw 2011',p:'Xbox 360',g:'Wrestling',pl:''},
+  {t:'WWE Smackdown: Here Comes The Pain',p:'PS2',g:'Wrestling',pl:''},
+  {t:'WWF Smackdown',p:'PSX',g:'Wrestling',pl:''},
+  {t:'WWF Smackdown - Just Bring It',p:'PS2',g:'Wrestling',pl:''},
+  {t:'WWF Smackdown 2',p:'PSX',g:'Wrestling',pl:''},
+  {t:'Xbox Live Arcade Compilation Disc',p:'Xbox 360',g:'Compilation',pl:''},
+  {t:'XIII',p:'Gamecube',g:'FPS',pl:''},
+  {t:'Zelda II: The Adventure of Link',p:'NES Mini',g:'Adventure',pl:''}
+  ];
+
+  // ---- Navigation ----
+  function showPage(name, linkEl) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    if (linkEl) {
+      linkEl.classList.add('active');
+    } else {
+      const links = document.querySelectorAll('.nav-links a');
+      const idx = ['home','drinks','games'].indexOf(name);
+      if (idx >= 0) links[idx].classList.add('active');
+    }
+    window.scrollTo(0, 0);
+  }
+
+  // ---- Platform helpers ----
+  function getPlatformClass(p) {
+    const pl = (p || '').toLowerCase();
+    if (pl === 'ps3') return 'platform-ps3';
+    if (pl === 'ps2') return 'platform-ps2';
+    if (pl === 'psx' || pl === 'psx mini') return 'platform-ps1';
+    if (pl === 'xbox 360') return 'platform-xbox360';
+    if (pl === 'xbox') return 'platform-xbox';
+    if (pl.includes('wii')) return 'platform-wii';
+    if (pl === 'gamecube') return 'platform-gamecube';
+    if (pl === 'n64') return 'platform-n64';
+    if (pl.includes('snes')) return 'platform-snes';
+    if (pl.includes('nes')) return 'platform-nes';
+    if (pl.includes('mega drive')) return 'platform-sega';
+    return 'platform-default';
+  }
+
+  function getPlatformEmoji(p) {
+    const pl = (p || '').toLowerCase();
+    if (pl.startsWith('ps')) return '🎮';
+    if (pl.includes('xbox')) return '🟢';
+    if (pl.includes('wii')) return '🕹️';
+    if (pl === 'gamecube') return '🟣';
+    if (pl === 'n64') return '🔴';
+    if (pl.includes('snes') || pl.includes('nes')) return '🔴';
+    if (pl.includes('mega drive')) return '🔵';
+    return '🎲';
+  }
+
+  let activeFilter = 'all';
+
+  function applyFilters() {
+    const search = document.getElementById('gameSearch').value.toLowerCase().trim();
+    const filtered = GAMES.filter(g => {
+      const matchPlatform = activeFilter === 'all' || g.p === activeFilter;
+      const matchSearch = !search || g.t.toLowerCase().includes(search) || g.g.toLowerCase().includes(search);
+      return matchPlatform && matchSearch;
+    });
+    renderGames(filtered);
+    document.getElementById('gamesCount').textContent = filtered.length + ' game' + (filtered.length !== 1 ? 's' : '');
+  }
+
+  function setFilter(platform, btn) {
+    activeFilter = platform;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function renderGames(games) {
+    const grid = document.getElementById('gamesGrid');
+    if (games.length === 0) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p class="empty-state-text">No games match your search</p></div>';
+      return;
+    }
+    grid.innerHTML = games.map(g => `
+      <div class="game-card">
+        <div class="game-platform ${getPlatformClass(g.p)}">${g.p}</div>
+        <div class="game-title">${g.t}</div>
+        <div class="game-genre">${g.g}</div>
+        ${g.pl ? `<div class="game-players">👥 ${g.pl}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function initGames() {
+    // Build platform filter tabs
+    const platforms = [...new Set(GAMES.map(g => g.p))].sort();
+    const tabs = document.getElementById('filterTabs');
+    tabs.innerHTML = `<button class="filter-tab active" onclick="setFilter('all', this)">All (${GAMES.length})</button>` +
+      platforms.map(p => `<button class="filter-tab" onclick="setFilter('${p.replace(/'/g,"\\'")}', this)">${p}</button>`).join('');
+
+    // Build consoles summary
+    const counts = {};
+    GAMES.forEach(g => { counts[g.p] = (counts[g.p] || 0) + 1; });
+    document.getElementById('consolesGrid').innerHTML = Object.entries(counts)
+      .sort((a,b) => b[1]-a[1])
+      .map(([name, count]) => `
+        <div class="console-card">
+          <div class="console-icon">${getPlatformEmoji(name)}</div>
+          <div class="console-name">${name}</div>
+          <div class="console-count">${count} game${count !== 1 ? 's' : ''}</div>
+        </div>`).join('');
+
+    renderGames(GAMES);
+  }
+
+  window.addEventListener('DOMContentLoaded', initGames);
+</script>
 </body>
 </html>
